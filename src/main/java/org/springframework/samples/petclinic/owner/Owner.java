@@ -147,4 +147,7 @@ public class Owner extends Person {
 				.append("telephone", this.telephone).toString();
 	}
 
+	public void removePet(Pet pet) {
+		getPetsInternal().remove(pet);
+	}
 }
