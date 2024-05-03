@@ -39,6 +39,8 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -195,5 +197,19 @@ class OwnerControllerTests {
 					}
 				}))).andExpect(view().name("owners/ownerDetails"));
 	}
+
+    @Test
+    void testGetOwnerByLastName() throws Exception {
+        given(this.owners.findByLastName(george.getLastName())).willReturn(Lists.newArrayList(george));
+        mockMvc.perform(get("/owners/by-last-name/Franklin"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$[0].id").value(TEST_OWNER_ID))
+                .andExpect(jsonPath("$[0].firstName").value("George"))
+                .andExpect(jsonPath("$[0].lastName").value("Franklin"))
+                .andExpect(jsonPath("$[0].address").value("110 W. Liberty St."))
+                .andExpect(jsonPath("$[0].city").value("Madison"))
+                .andExpect(jsonPath("$[0].telephone").value("6085551023"));
+    }
 
 }
