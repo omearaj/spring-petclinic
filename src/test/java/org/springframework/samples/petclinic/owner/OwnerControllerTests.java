@@ -196,4 +196,35 @@ class OwnerControllerTests {
 				}))).andExpect(view().name("owners/ownerDetails"));
 	}
 
+	@Test
+	void testProcessCreationFormWithNullValues() throws Exception {
+		mockMvc.perform(post("/owners/new").param("firstName", "").param("lastName", "")
+				.param("address", "").param("city", "").param("telephone", ""))
+				.andExpect(status().isOk()).andExpect(model().attributeHasErrors("owner"))
+				.andExpect(model().attributeHasFieldErrors("owner", "firstName"))
+				.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
+				.andExpect(model().attributeHasFieldErrors("owner", "address"))
+				.andExpect(model().attributeHasFieldErrors("owner", "city"))
+				.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
+				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	}
+
+	@Test
+	void testProcessCreationFormWithInvalidDataTypes() throws Exception {
+		mockMvc.perform(post("/owners/new").param("firstName", "Joe").param("lastName", "Bloggs")
+				.param("address", "123 Caramel Street").param("city", "London").param("telephone", "invalidPhoneNumber"))
+				.andExpect(status().isOk()).andExpect(model().attributeHasErrors("owner"))
+				.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
+				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	}
+
+	@Test
+	void testProcessCreationFormWithSQLInjection() throws Exception {
+		mockMvc.perform(post("/owners/new").param("firstName", "Joe").param("lastName", "Bloggs")
+				.param("address", "123 Caramel Street").param("city", "London").param("telephone", "01316761638'; DROP TABLE owners; --"))
+				.andExpect(status().isOk()).andExpect(model().attributeHasErrors("owner"))
+				.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
+				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	}
+
 }
